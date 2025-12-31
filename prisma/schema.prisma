@@ -1,0 +1,492 @@
+// ===========================================
+// PRISMA SCHEMA - CALENDRIER COUPLE
+// ===========================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===========================================
+// AUTHENTIFICATION & UTILISATEURS
+// ===========================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  name          String?
+  firstName     String?
+  lastName      String?
+  avatar        String?
+
+  // Statut en temps réel
+  currentStatus UserStatus @default(AVAILABLE)
+  statusMessage String?
+  lastSeenAt    DateTime?
+
+  // Relation couple (self-referencing)
+  partnerId      String?   @unique
+  partner        User?     @relation("CouplePartnership", fields: [partnerId], references: [id])
+  partnerOf      User?     @relation("CouplePartnership")
+  coupleLinkedAt DateTime?
+
+  // Relations NextAuth
+  accounts Account[]
+  sessions Session[]
+
+  // Événements
+  ownedEvents Event[] @relation("EventOwner")
+
+  // Todos
+  ownedTodos    Todo[] @relation("TodoOwner")
+  assignedTodos Todo[] @relation("TodoAssignee")
+
+  // Catégories personnalisées
+  categories Category[]
+
+  // Notifications
+  notifications Notification[]
+
+  // Invitations partenaire
+  sentInvitations     PartnerInvitation[] @relation("InvitationSender")
+  receivedInvitations PartnerInvitation[] @relation("InvitationReceiver")
+
+  // Paramètres
+  settings UserSettings?
+
+  // Historique
+  eventHistory EventHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([partnerId])
+}
+
+enum UserStatus {
+  AVAILABLE
+  BUSY
+  OUT_OF_FRANCE
+  DO_NOT_DISTURB
+  OFFLINE
+}
+
+model UserSettings {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Apparence
+  theme               Theme        @default(SYSTEM)
+  primaryColor        String       @default("#6366f1")
+  calendarStartDay    Int          @default(1) // 0=Dimanche, 1=Lundi
+  defaultCalendarView CalendarView @default(MONTH)
+  timeFormat          TimeFormat   @default(H24)
+  dateFormat          String       @default("dd/MM/yyyy")
+
+  // Notifications
+  emailNotifications Boolean @default(true)
+  pushNotifications  Boolean @default(true)
+  reminderDefault    Int     @default(30) // Minutes avant
+
+  // Confidentialité
+  shareLocationWithPartner Boolean @default(true)
+  showBusyToPartner        Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Theme {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum CalendarView {
+  DAY
+  WEEK
+  MONTH
+  YEAR
+}
+
+enum TimeFormat {
+  H12
+  H24
+}
+
+// ===========================================
+// NEXTAUTH MODELS
+// ===========================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Token pour magic link et reset password
+model Token {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  type      TokenType
+  email     String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([token])
+  @@index([email])
+}
+
+enum TokenType {
+  MAGIC_LINK
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+}
+
+// ===========================================
+// GESTION DU COUPLE
+// ===========================================
+
+model PartnerInvitation {
+  id       String @id @default(cuid())
+  senderId String
+  sender   User   @relation("InvitationSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiverId String?
+  receiver   User?   @relation("InvitationReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  email       String
+  status      InvitationStatus @default(PENDING)
+  token       String           @unique @default(cuid())
+  message     String?
+  expiresAt   DateTime
+  respondedAt DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([email])
+  @@index([token])
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+// ===========================================
+// ÉVÉNEMENTS
+// ===========================================
+
+model Event {
+  id String @id @default(cuid())
+
+  // Propriétaire
+  ownerId String
+  owner   User   @relation("EventOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Informations de base
+  title       String
+  description String? @db.Text
+  location    String?
+
+  // Dates
+  startDate DateTime
+  endDate   DateTime
+  isAllDay  Boolean  @default(false)
+  timezone  String   @default("Europe/Paris")
+
+  // Visibilité
+  visibility EventVisibility @default(PRIVATE)
+
+  // Statut affiché au partenaire
+  status EventStatus @default(BUSY)
+
+  // Catégorie
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Couleur personnalisée (override catégorie)
+  color String?
+
+  // Récurrence
+  isRecurring         Boolean  @default(false)
+  recurrenceRule      String?
+  recurrenceEnd       DateTime?
+  parentEventId       String?
+  parentEvent         Event?   @relation("RecurrenceInstances", fields: [parentEventId], references: [id], onDelete: Cascade)
+  recurrenceInstances Event[]  @relation("RecurrenceInstances")
+
+  // Rappels
+  reminders Reminder[]
+
+  // Historique
+  history EventHistory[]
+
+  // Conversion depuis todo
+  convertedFromTodoId String? @unique
+  convertedFromTodo   Todo?   @relation(fields: [convertedFromTodoId], references: [id], onDelete: SetNull)
+
+  // Notifications générées
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([visibility])
+  @@index([categoryId])
+  @@index([parentEventId])
+}
+
+enum EventVisibility {
+  PRIVATE
+  SHARED
+  BUSY_ONLY
+}
+
+enum EventStatus {
+  BUSY
+  AVAILABLE
+  OUT_OF_FRANCE
+  TENTATIVE
+}
+
+model Reminder {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  type   ReminderType @default(NOTIFICATION)
+  time   Int // Minutes avant l'événement
+  sent   Boolean      @default(false)
+  sentAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([sent])
+}
+
+enum ReminderType {
+  NOTIFICATION
+  EMAIL
+  BOTH
+}
+
+// ===========================================
+// TODOS
+// ===========================================
+
+model Todo {
+  id String @id @default(cuid())
+
+  // Propriétaire
+  ownerId String
+  owner   User   @relation("TodoOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Informations
+  title       String
+  description String? @db.Text
+
+  // Statut
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+
+  // Priorité
+  priority TodoPriority @default(MEDIUM)
+
+  // Date d'échéance
+  dueDate DateTime?
+
+  // Partage
+  isShared Boolean @default(false)
+
+  // Assignation (si partagé)
+  assigneeId String?
+  assignee   User?   @relation("TodoAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  // Catégorie
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  // Conversion en événement
+  convertedToEvent Event?
+
+  // Ordre d'affichage
+  sortOrder Int @default(0)
+
+  // Notifications
+  notifications Notification[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([isShared])
+  @@index([completed])
+  @@index([dueDate])
+  @@index([priority])
+  @@index([categoryId])
+  @@index([assigneeId])
+}
+
+enum TodoPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// ===========================================
+// CATÉGORIES & TAGS
+// ===========================================
+
+model Category {
+  id String @id @default(cuid())
+
+  // Propriétaire (null = catégorie système)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name     String
+  color    String  @default("#6366f1")
+  icon     String?
+  isSystem Boolean @default(false)
+
+  // Relations
+  events Event[]
+  todos  Todo[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+// ===========================================
+// NOTIFICATIONS
+// ===========================================
+
+model Notification {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type    NotificationType
+  title   String
+  message String
+
+  // Références optionnelles
+  eventId String?
+  event   Event?  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  todoId String?
+  todo   Todo?   @relation(fields: [todoId], references: [id], onDelete: Cascade)
+
+  // Statut
+  read   Boolean   @default(false)
+  readAt DateTime?
+
+  // Action
+  actionUrl String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  EVENT_REMINDER
+  EVENT_CREATED
+  EVENT_UPDATED
+  EVENT_DELETED
+  TODO_ASSIGNED
+  TODO_COMPLETED
+  TODO_DUE_SOON
+  PARTNER_INVITATION
+  PARTNER_ACCEPTED
+  PARTNER_STATUS
+  SYSTEM
+}
+
+// ===========================================
+// HISTORIQUE DES MODIFICATIONS
+// ===========================================
+
+model EventHistory {
+  id String @id @default(cuid())
+
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  action  HistoryAction
+  changes Json
+
+  createdAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum HistoryAction {
+  CREATED
+  UPDATED
+  DELETED
+  VISIBILITY_CHANGED
+  MOVED
+}
