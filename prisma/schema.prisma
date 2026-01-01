@@ -23,7 +23,8 @@ model User {
   name          String?
   firstName     String?
   lastName      String?
-  avatar        String?
+  image         String?   // Pour NextAuth (Google profile image)
+  avatar        String?   // Avatar custom uploadé
 
   // Statut en temps réel
   currentStatus UserStatus @default(AVAILABLE)

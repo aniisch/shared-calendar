@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Calendar, Bell, Menu, X } from "lucide-react";
+import { Calendar, Menu, X, ListTodo, Heart } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
+import { NotificationBell } from "@/components/notifications";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/calendar", label: "Calendrier", icon: Calendar },
+  { href: "/todos", label: "Tâches", icon: ListTodo },
 ];
 
 interface HeaderProps {
@@ -65,11 +67,31 @@ export function Header({ user }: HeaderProps) {
 
         {/* Right side */}
         <div className="flex items-center gap-2 ml-auto">
-          {/* Notifications */}
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="sr-only">Notifications</span>
+          {/* Partner Status */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            asChild
+          >
+            <Link href="/settings/partner">
+              <Heart
+                className={cn(
+                  "h-5 w-5",
+                  user.partnerId
+                    ? "text-pink-500 fill-pink-500"
+                    : "text-muted-foreground"
+                )}
+              />
+              {!user.partnerId && (
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-pink-500 rounded-full" />
+              )}
+              <span className="sr-only">Partenaire</span>
+            </Link>
           </Button>
+
+          {/* Notifications */}
+          <NotificationBell />
 
           {/* Theme Toggle */}
           <ThemeToggle />

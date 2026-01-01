@@ -1,63 +1,104 @@
 # Calendrier Couple
 
-Un calendrier partagé moderne et élégant conçu pour les couples. Organisez votre vie à deux avec des événements, des tâches et un suivi en temps réel.
+Un calendrier partagé moderne et élégant conçu spécialement pour les couples. Gérez vos événements, tâches et planning à deux en toute simplicité.
+
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=flat-square&logo=prisma)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38B2AC?style=flat-square&logo=tailwind-css)
+
+---
 
 ## Fonctionnalités
 
-### Calendrier Partagé
-- **4 vues** : Jour, Semaine, Mois, Année
-- **Drag & drop** pour déplacer les événements
-- **Superposition visuelle** des événements de votre partenaire
-- Navigation intuitive et fluide
+### Calendrier Multi-Vues
+- **Vue Mois** : Grille classique avec aperçu des événements
+- **Vue Semaine** : Timeline détaillée sur 7 jours (6h-22h)
+- **Vue Jour** : Créneaux horaires de 30 minutes
+- **Vue Année** : 12 mini-mois cliquables pour une vision globale
+- Navigation fluide entre les dates et les vues
+- Jour actuel surligné visuellement
 
 ### Gestion des Événements
+- Création rapide avec titre, dates, lieu et description
+- **8 couleurs personnalisables** pour catégoriser visuellement
 - **Visibilité configurable** :
   - `Privé` - Invisible pour votre partenaire
   - `Partagé` - Visible avec tous les détails
   - `Occupé` - Visible comme "Occupé" sans détails
-- Statuts : Disponible, Occupé, Hors France, Ne pas déranger
-- Catégories personnalisables avec couleurs
-- Récurrence (quotidien, hebdomadaire, mensuel, annuel)
-- Rappels et notifications
+- **Récurrence avancée** : Quotidien, Hebdomadaire, Bi-hebdomadaire, Mensuel, Annuel, Jours ouvrés
+- **Rappels configurables** : 5min, 15min, 30min, 1h, 2h, 1 jour, 2 jours, 1 semaine avant
+- Catégories personnalisées avec couleurs
+- Historique complet des modifications
+
+### Système Partenaire
+- Invitation par email avec lien sécurisé
+- Liaison bidirectionnelle des comptes
+- Affichage des événements partagés du partenaire
+- Statut de disponibilité visible (Disponible, Occupé, Hors France, Ne pas déranger)
+- Mode privé : maximum 2 utilisateurs
 
 ### To-Do Lists
-- Liste personnelle pour chaque utilisateur
-- Liste partagée (tâches en commun)
-- Priorités : Low, Medium, High, Urgent
-- Conversion automatique todo → événement
-- Assignation au partenaire
+- Listes personnelles et partagées
+- **4 niveaux de priorité** : Basse, Moyenne, Haute, Urgente
+- Date d'échéance avec indicateur de retard
+- Assignation de tâches au partenaire
+- Conversion de tâche en événement calendrier
 
-### Système de Partenariat
-- Invitation par email
-- Vue "Où est l'autre" (statut en temps réel)
-- Liaison/Déliaison des comptes
+### Notifications
+- Notifications in-app en temps réel
+- Badge compteur de non-lus
+- Alertes pour événements, tâches et actions partenaire
+- Notifications email configurables
 
-### Interface Moderne
-- Design élégant avec thème clair/sombre
-- Responsive (mobile, tablette, desktop)
-- Animations fluides
-- Composants shadcn/ui
+### Paramètres Personnalisables
+- **Profil** : Nom, prénom, avatar
+- **Apparence** : Thème (Clair/Sombre/Système), couleurs, format de date/heure
+- **Notifications** : Préférences email, push, rappels par défaut
+- **Catégories** : Création, modification, suppression de catégories personnalisées
+
+### Authentification Sécurisée
+- Connexion Email / Mot de passe
+- **Google OAuth** en un clic
+- **Magic Links** par email
+- Réinitialisation de mot de passe
+- Vérification d'email
+- Restriction par liste d'emails autorisés
+
+---
 
 ## Stack Technique
 
-- **Frontend** : Next.js 14+ (App Router), React 18, TypeScript
-- **Styling** : TailwindCSS, shadcn/ui, Lucide icons
-- **Base de données** : PostgreSQL avec Prisma ORM
-- **Authentification** : NextAuth v5 (Email/Password, Magic Links, Google OAuth)
-- **State Management** : Zustand, TanStack Query
-- **Emails** : Nodemailer avec SMTP
-- **Calendrier** : date-fns, @dnd-kit, rrule
+### Frontend
+- **Next.js 14** (App Router)
+- **React 18** avec Server Components
+- **TypeScript** pour la sécurité des types
+- **TailwindCSS** pour le styling
+- **shadcn/ui** pour les composants UI
+- **React Query** (@tanstack/react-query) pour le cache et data fetching
+- **React Hook Form** + **Zod** pour les formulaires
+- **date-fns** pour la manipulation des dates
+- **RRule** pour la récurrence des événements
+- **Lucide React** pour les icônes
 
-## Prérequis
+### Backend
+- **Next.js API Routes**
+- **Prisma ORM** avec PostgreSQL
+- **NextAuth.js v5** pour l'authentification
+- **Nodemailer** pour les emails SMTP
+- **bcrypt** pour le hachage des mots de passe
 
-- Node.js 18+
-- PostgreSQL 14+
-- Compte Google Cloud (pour OAuth)
-- Serveur SMTP (pour les emails)
+---
 
 ## Installation
 
-### 1. Cloner le repository
+### Prérequis
+- Node.js 18+
+- PostgreSQL (ou compte [Neon](https://neon.tech))
+- Compte Google Cloud (pour OAuth)
+- Serveur SMTP (pour les emails)
+
+### 1. Cloner le projet
 
 ```bash
 git clone https://github.com/votre-username/shared-calendar.git
@@ -72,45 +113,38 @@ npm install
 
 ### 3. Configurer les variables d'environnement
 
-Copier le fichier `.env.example` en `.env.local` :
-
-```bash
-cp .env.example .env.local
-```
-
-Puis remplir les variables :
+Créer un fichier `.env.local` :
 
 ```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/shared_calendar"
+# Base de données
+DATABASE_URL="postgresql://user:password@host:5432/database?sslmode=require"
 
 # NextAuth
 NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="votre-secret-genere"
+NEXTAUTH_SECRET="votre-secret-genere"  # openssl rand -base64 32
 
-# Google OAuth (optionnel)
-GOOGLE_CLIENT_ID="votre-client-id"
-GOOGLE_CLIENT_SECRET="votre-client-secret"
+# Google OAuth
+GOOGLE_CLIENT_ID="votre-client-id.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="GOCSPX-votre-secret"
 
-# SMTP
-SMTP_HOST="smtp.example.com"
-SMTP_PORT="587"
-SMTP_USER="noreply@example.com"
-SMTP_PASSWORD="votre-password"
-EMAIL_FROM="Calendrier Couple <noreply@example.com>"
+# SMTP Email
+SMTP_HOST="smtp.votre-provider.com"
+SMTP_PORT="465"
+SMTP_USER="votre-email@domaine.com"
+SMTP_PASSWORD="votre-mot-de-passe"
+SMTP_SECURE="true"
+EMAIL_FROM="Calendrier Couple <noreply@votre-domaine.com>"
+
+# Restriction d'accès (emails autorisés, séparés par des virgules)
+ALLOWED_EMAILS="email1@example.com,email2@example.com"
+MAX_USERS="2"
 ```
 
 ### 4. Initialiser la base de données
 
 ```bash
-# Générer le client Prisma
-npm run db:generate
-
-# Créer les tables
-npm run db:push
-
-# (Optionnel) Lancer Prisma Studio pour visualiser les données
-npm run db:studio
+npx prisma db push
+npx prisma generate
 ```
 
 ### 5. Lancer le serveur de développement
@@ -121,137 +155,124 @@ npm run dev
 
 L'application est accessible sur [http://localhost:3000](http://localhost:3000)
 
-## Scripts Disponibles
+---
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Lance le serveur de développement |
-| `npm run build` | Build pour la production |
-| `npm run start` | Lance le serveur de production |
-| `npm run lint` | Vérifie le code avec ESLint |
-| `npm run db:generate` | Génère le client Prisma |
-| `npm run db:push` | Synchronise le schema avec la BDD |
-| `npm run db:migrate` | Crée une migration |
-| `npm run db:studio` | Lance Prisma Studio |
-| `npm run db:seed` | Peuple la BDD avec des données de test |
+## Configuration Google OAuth
+
+1. Aller sur [Google Cloud Console](https://console.cloud.google.com)
+2. Créer un nouveau projet
+3. Activer l'API Google+
+4. Configurer l'écran de consentement OAuth
+5. Créer des identifiants OAuth 2.0 :
+   - **Origines autorisées** : `http://localhost:3000`
+   - **URI de redirection** : `http://localhost:3000/api/auth/callback/google`
+6. Copier le Client ID et Client Secret dans `.env.local`
+
+Pour la production, ajouter également les URLs de votre domaine.
+
+---
 
 ## Structure du Projet
 
 ```
-shared-calendar/
-├── prisma/
-│   ├── schema.prisma          # Schema de base de données
-│   └── seed.ts                # Données de test
-├── src/
-│   ├── app/                   # App Router Next.js
-│   │   ├── (auth)/            # Pages d'authentification
-│   │   ├── (dashboard)/       # Pages protégées
-│   │   └── api/               # Routes API
-│   ├── components/
-│   │   ├── ui/                # Composants shadcn/ui
-│   │   ├── calendar/          # Composants calendrier
-│   │   ├── events/            # Composants événements
-│   │   ├── todos/             # Composants todos
-│   │   └── ...
-│   ├── lib/                   # Utilitaires et configs
-│   ├── hooks/                 # Custom hooks React
-│   ├── stores/                # Zustand stores
-│   ├── types/                 # Types TypeScript
-│   └── services/              # Logique métier
-├── public/                    # Assets statiques
-└── ...
+src/
+├── app/
+│   ├── (auth)/              # Pages publiques (login, register, etc.)
+│   ├── (dashboard)/         # Pages protégées
+│   │   ├── calendar/        # Calendrier principal
+│   │   ├── todos/           # Liste des tâches
+│   │   └── settings/        # Paramètres utilisateur
+│   └── api/                 # API Routes
+│       ├── auth/            # Authentification
+│       ├── events/          # CRUD événements
+│       ├── todos/           # CRUD tâches
+│       ├── categories/      # CRUD catégories
+│       ├── notifications/   # Notifications
+│       ├── partner/         # Système partenaire
+│       └── user/            # Profil utilisateur
+├── components/
+│   ├── ui/                  # Composants shadcn/ui
+│   ├── calendar/            # Vues du calendrier
+│   ├── events/              # Formulaires événements
+│   ├── todos/               # Composants tâches
+│   ├── notifications/       # Notifications
+│   ├── partner/             # Partenaire
+│   ├── auth/                # Formulaires auth
+│   ├── layout/              # Header, navigation
+│   └── providers/           # Context providers
+├── hooks/                   # Hooks React Query
+├── lib/                     # Utilitaires (auth, prisma, mail, recurrence, etc.)
+└── middleware.ts            # Protection des routes
 ```
-
-## Restriction d'accès (Mode Privé)
-
-Cette application peut être verrouillée pour un usage privé (ex: couple uniquement).
-
-Dans `.env` et `.env.local`, ajoutez :
-
-```env
-# Liste des emails autorisés (séparés par des virgules)
-ALLOWED_EMAILS="email1@example.com,email2@example.com"
-```
-
-- Seuls ces emails pourront s'inscrire ou se connecter
-- Maximum 2 utilisateurs par défaut (modifiable dans `src/lib/auth.ts`)
-
-## Déploiement
-
-### Vercel (Recommandé)
-
-1. Connecter votre repository à Vercel
-2. Ajouter les variables d'environnement
-3. Déployer
-
-### Docker
-
-```bash
-docker build -t shared-calendar .
-docker run -p 3000:3000 shared-calendar
-```
-
-### Self-hosted
-
-```bash
-npm run build
-npm run start
-```
-
-## Configuration Google OAuth
-
-1. Aller sur [Google Cloud Console](https://console.cloud.google.com/)
-2. Créer un nouveau projet
-3. Configurer l'écran de consentement OAuth (External)
-4. Créer des identifiants OAuth 2.0 (Web application)
-5. Ajouter les URLs :
-
-**Origines JavaScript autorisées :**
-- `http://localhost:3000` (dev)
-- `https://votre-domaine.com` (prod)
-
-**URI de redirection autorisés :**
-- `http://localhost:3000/api/auth/callback/google` (dev)
-- `https://votre-domaine.com/api/auth/callback/google` (prod)
-
-6. Copier le Client ID et Client Secret dans `.env.local`
-
-## Checklist Passage en Production
-
-Avant de déployer en production, vérifiez ces points :
-
-### 1. Variables d'environnement
-```env
-# Changer localhost par votre domaine
-NEXTAUTH_URL="https://votre-domaine.com"
-```
-
-### 2. Google OAuth Console
-- [ ] Ajouter `https://votre-domaine.com` aux origines autorisées
-- [ ] Ajouter `https://votre-domaine.com/api/auth/callback/google` aux URIs de redirection
-- [ ] Passer l'app en mode "Production" (pas "Testing")
-- [ ] Soumettre pour vérification si nécessaire
-
-### 3. Configuration SMTP
-- [ ] Vérifier que EMAIL_FROM utilise un domaine valide
-- [ ] Tester l'envoi d'emails depuis le serveur de production
-
-### 4. Base de données
-- [ ] Utiliser une connexion SSL (`?sslmode=require`)
-- [ ] Configurer les backups automatiques
-
-### 5. Sécurité
-- [ ] Générer un nouveau NEXTAUTH_SECRET pour la production
-- [ ] Ne jamais commiter les fichiers `.env` avec les secrets
-
-## Contribution
-
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
-
-## Licence
-
-MIT License - voir [LICENSE](LICENSE) pour plus de détails.
 
 ---
 
-Fait avec amour pour les couples organisés
+## Scripts Disponibles
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Serveur de développement |
+| `npm run build` | Build de production |
+| `npm run start` | Lancer en production |
+| `npm run lint` | Vérification ESLint |
+
+| Prisma | Description |
+|--------|-------------|
+| `npx prisma studio` | Interface visuelle BDD |
+| `npx prisma db push` | Synchroniser le schéma |
+| `npx prisma generate` | Générer le client Prisma |
+
+---
+
+## Checklist Déploiement
+
+### Variables d'environnement
+```env
+NEXTAUTH_URL="https://votre-domaine.com"
+NEXTAUTH_SECRET="nouveau-secret-genere"
+```
+
+### Google OAuth Console
+- [ ] Ajouter `https://votre-domaine.com` aux origines autorisées
+- [ ] Ajouter `https://votre-domaine.com/api/auth/callback/google` aux URIs de redirection
+- [ ] Passer l'app en mode "Production"
+
+### Sécurité
+- [ ] Générer un nouveau NEXTAUTH_SECRET (`openssl rand -base64 32`)
+- [ ] Vérifier que `.env` est dans `.gitignore`
+- [ ] DATABASE_URL avec SSL (`?sslmode=require`)
+
+---
+
+## Roadmap
+
+### Synchronisation Google Calendar
+- [ ] Connexion OAuth2 avec scopes Calendar
+- [ ] Import des événements Google vers l'application
+- [ ] Export des événements vers Google Calendar
+- [ ] Synchronisation bidirectionnelle en temps réel
+
+### Import Intelligent d'Événements
+- [ ] Parser emails Doctolib (rendez-vous médicaux)
+- [ ] Parser emails Nibelis (congés, absences professionnelles)
+- [ ] Parser billets d'avion (emails des compagnies aériennes)
+- [ ] Parser réservations (hôtels, restaurants, spectacles)
+- [ ] Détection automatique via IA
+
+### Autres Améliorations
+- [ ] PWA (Progressive Web App)
+- [ ] Notifications push navigateur
+- [ ] Mode hors-ligne avec synchronisation
+- [ ] Widget calendrier pour bureau
+- [ ] Export ICS/iCal
+- [ ] Partage de calendrier par lien
+
+---
+
+## Licence
+
+Ce projet est privé et destiné à un usage personnel.
+
+---
+
+Développé avec Next.js, TypeScript et beaucoup de soin pour les couples organisés.

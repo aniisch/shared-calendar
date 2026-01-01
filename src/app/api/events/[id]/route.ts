@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { eventSchema } from "@/lib/validators";
+import { notifyEventUpdated, notifyEventDeleted } from "@/lib/notifications";
 
 // GET /api/events/[id] - Récupérer un événement
 export async function GET(
@@ -173,6 +174,16 @@ export async function PUT(
       },
     });
 
+    // Notifier le partenaire si l'événement est partagé
+    if (data.visibility === "SHARED" && session.user.partnerId) {
+      await notifyEventUpdated(
+        session.user.partnerId,
+        event.title,
+        event.id,
+        session.user.name || "Votre partenaire"
+      );
+    }
+
     return NextResponse.json(event);
   } catch (error) {
     console.error("Erreur PUT /api/events/[id]:", error);
@@ -216,6 +227,15 @@ export async function DELETE(
       return NextResponse.json(
         { error: "Vous ne pouvez supprimer que vos propres événements" },
         { status: 403 }
+      );
+    }
+
+    // Notifier le partenaire si l'événement était partagé
+    if (existingEvent.visibility === "SHARED" && session.user.partnerId) {
+      await notifyEventDeleted(
+        session.user.partnerId,
+        existingEvent.title,
+        session.user.name || "Votre partenaire"
       );
     }
 

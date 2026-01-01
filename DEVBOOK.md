@@ -18,6 +18,7 @@ Guide de développement complet avec toutes les étapes d'implémentation.
 10. [Phase 10 : Paramètres](#phase-10--paramètres)
 11. [Phase 11 : Optimisation & Finition](#phase-11--optimisation--finition)
 12. [Phase 12 : Déploiement](#phase-12--déploiement)
+13. [Roadmap Future](#roadmap-future)
 
 ---
 
@@ -31,55 +32,19 @@ Guide de développement complet avec toutes les étapes d'implémentation.
 | 4 | UI/UX de Base | ✅ Complété |
 | 5 | Calendrier | ✅ Complété |
 | 6 | Gestion des Événements | ✅ Complété |
-| 7 | To-Do Lists | ⏳ À faire |
-| 8 | Système Partenaire | ⏳ À faire |
-| 9 | Notifications | ⏳ À faire |
-| 10 | Paramètres | ⏳ À faire |
-| 11 | Optimisation & Finition | ⏳ À faire |
+| 7 | To-Do Lists | ✅ Complété |
+| 8 | Système Partenaire | ✅ Complété |
+| 9 | Notifications | ✅ Complété |
+| 10 | Paramètres | ✅ Complété |
+| 11 | Optimisation & Finition | ✅ Complété |
 | 12 | Déploiement | ⏳ À faire |
-
----
-
-## 🧪 À TESTER MAINTENANT
-
-```bash
-npm run dev
-```
-
-### Checklist de test :
-
-#### 1. Authentification
-- [ ] Aller sur http://localhost:3000/login
-- [ ] Se connecter avec Google
-- [ ] Vérifier la redirection vers /calendar
-- [ ] Tester le menu utilisateur (en haut à droite)
-- [ ] Tester la déconnexion
-
-#### 2. Calendrier - Navigation
-- [ ] Vue Mois s'affiche par défaut
-- [ ] Cliquer "Semaine" → vue semaine
-- [ ] Cliquer "Jour" → vue jour
-- [ ] Cliquer "Année" → vue année
-- [ ] Flèches < > pour naviguer
-- [ ] Bouton "Aujourd'hui"
-
-#### 3. Événements - CRUD
-- [ ] Cliquer "+ Événement" → modal s'ouvre
-- [ ] Créer un événement avec titre, dates, couleur
-- [ ] Vérifier qu'il apparaît sur le calendrier
-- [ ] Cliquer sur l'événement → modifier
-- [ ] Supprimer l'événement (bouton rouge)
-
-#### 4. Thème
-- [ ] Cliquer sur l'icône soleil/lune
-- [ ] Tester Light / Dark / System
 
 ---
 
 ## Phase 1 : Initialisation ✅
 
 ### 1.1 Setup du Projet
-- [x] Créer le projet Next.js avec TypeScript
+- [x] Créer le projet Next.js 14 avec TypeScript
 - [x] Configurer TailwindCSS
 - [x] Ajouter le package.json avec toutes les dépendances
 - [x] Configurer tsconfig.json
@@ -88,23 +53,19 @@ npm run dev
 - [x] Créer postcss.config.mjs
 - [x] Créer components.json pour shadcn/ui
 
-### 1.2 Installation des Dépendances
-```bash
-npm install
-```
-
-**Dépendances principales :**
+### 1.2 Dépendances principales
 - `next`, `react`, `react-dom` - Framework
 - `next-auth`, `@auth/prisma-adapter` - Authentification
 - `@prisma/client`, `prisma` - ORM
 - `tailwindcss`, `tailwindcss-animate` - Styling
 - `@radix-ui/*` - Composants headless
 - `lucide-react` - Icônes
-- `date-fns`, `date-fns-tz` - Manipulation dates
+- `date-fns` - Manipulation dates
 - `react-hook-form`, `zod` - Formulaires
 - `nodemailer` - Emails
 - `next-themes` - Thèmes dark/light
-- `sonner` - Toasts
+- `@tanstack/react-query` - Data fetching & caching
+- `rrule` - Récurrence événements
 
 ### 1.3 Structure des Dossiers
 ```
@@ -117,28 +78,27 @@ src/
 │   ├── ui/               # shadcn/ui
 │   ├── calendar/         # Composants calendrier
 │   ├── events/           # Composants événements
+│   ├── todos/            # Composants tâches
+│   ├── notifications/    # Composants notifications
+│   ├── partner/          # Composants partenaire
 │   ├── auth/             # Composants auth
 │   ├── layout/           # Header, etc.
 │   └── providers/        # Context providers
+├── hooks/                # Custom hooks React Query
 ├── lib/                  # Utilitaires
 └── middleware.ts         # Protection routes
 ```
-
-### 1.4 Fichiers de Configuration
-- [x] `.env.example` - Template variables d'environnement
-- [x] `.gitignore` - Fichiers à ignorer
-- [x] `.eslintrc.json` - Configuration ESLint
 
 ---
 
 ## Phase 2 : Authentification ✅
 
 ### 2.1 Configuration NextAuth v5
-- [x] Créer `src/lib/auth.ts` avec config NextAuth
 - [x] Provider Credentials (email/mot de passe)
 - [x] Provider Google OAuth
 - [x] Provider Magic Link (custom avec tokens)
 - [x] JWT strategy avec session étendue
+- [x] Prisma Adapter
 
 ### 2.2 Pages d'Authentification
 - [x] `/login` - Page de connexion
@@ -148,261 +108,200 @@ src/
 - [x] `/verify-email` - Vérification email
 
 ### 2.3 API Routes Auth
-- [x] `src/app/api/auth/[...nextauth]/route.ts`
-- [x] `src/app/api/auth/register/route.ts`
-- [x] `src/app/api/auth/magic-link/route.ts`
-- [x] `src/app/api/auth/verify-email/route.ts`
-- [x] `src/app/api/auth/forgot-password/route.ts`
-- [x] `src/app/api/auth/reset-password/route.ts`
+- [x] `/api/auth/[...nextauth]`
+- [x] `/api/auth/register`
+- [x] `/api/auth/magic-link`
+- [x] `/api/auth/verify-email`
+- [x] `/api/auth/forgot-password`
+- [x] `/api/auth/reset-password`
 
-### 2.4 Middleware de Protection
-- [x] Créer `src/middleware.ts`
-- [x] Redirection automatique /login si non connecté
-- [x] Redirection /calendar si déjà connecté sur pages auth
-
-### 2.5 Service Email
-- [x] Créer `src/lib/mail.ts` avec Nodemailer
-- [x] Configuration SMTP Hostinger
-- [x] Templates emails HTML (magic link, reset password, verification)
-
-### 2.6 Restrictions d'Accès
+### 2.4 Sécurité
+- [x] Middleware de protection des routes
 - [x] ALLOWED_EMAILS pour limiter les inscriptions
 - [x] MAX_USERS = 2 pour mode couple privé
+- [x] Hachage bcrypt des mots de passe
+- [x] Tokens sécurisés avec expiration
 
 ---
 
 ## Phase 3 : Base de Données ✅
 
-### 3.1 Schema Prisma
-- [x] Créer `prisma/schema.prisma` complet
-
-### 3.2 Modèles Créés
+### 3.1 Modèles Prisma
 - [x] `User` - Utilisateur avec relation partenaire self-referencing
 - [x] `UserSettings` - Paramètres utilisateur
 - [x] `Account` - Comptes OAuth (NextAuth)
-- [x] `Session` - Sessions utilisateur (NextAuth)
-- [x] `VerificationToken` - Tokens NextAuth
+- [x] `Session` - Sessions utilisateur
 - [x] `Token` - Tokens custom (magic link, reset password)
 - [x] `PartnerInvitation` - Invitations partenaire
-- [x] `Event` - Événements calendrier
+- [x] `Event` - Événements calendrier avec récurrence
 - [x] `Reminder` - Rappels d'événements
 - [x] `Todo` - Tâches à faire
 - [x] `Category` - Catégories personnalisées
 - [x] `Notification` - Notifications in-app
 - [x] `EventHistory` - Historique des modifications
 
-### 3.3 Enums
-- [x] `UserStatus` - AVAILABLE, BUSY, OUT_OF_FRANCE, DO_NOT_DISTURB, OFFLINE
-- [x] `Theme` - LIGHT, DARK, SYSTEM
-- [x] `CalendarView` - DAY, WEEK, MONTH, YEAR
-- [x] `EventVisibility` - PRIVATE, SHARED, BUSY_ONLY
-- [x] `EventStatus` - BUSY, AVAILABLE, OUT_OF_FRANCE, TENTATIVE
-- [x] `TodoPriority` - LOW, MEDIUM, HIGH, URGENT
-- [x] `NotificationType` - EVENT_REMINDER, EVENT_CREATED, etc.
-
-### 3.4 Configuration
-- [x] Créer `src/lib/prisma.ts` (singleton)
-- [x] Exécuter `npx prisma generate`
-- [x] Exécuter `npx prisma db push`
-- [x] Catégories par défaut créées à l'inscription (dans auth.ts)
+### 3.2 Enums
+- `UserStatus` - AVAILABLE, BUSY, OUT_OF_FRANCE, DO_NOT_DISTURB, OFFLINE
+- `EventVisibility` - PRIVATE, SHARED, BUSY_ONLY
+- `EventStatus` - BUSY, AVAILABLE, OUT_OF_FRANCE, TENTATIVE
+- `TodoPriority` - LOW, MEDIUM, HIGH, URGENT
+- `NotificationType` - EVENT_REMINDER, EVENT_CREATED, TODO_ASSIGNED, etc.
 
 ---
 
 ## Phase 4 : UI/UX de Base ✅
 
-### 4.1 Layout Dashboard
-- [x] Créer `src/app/(dashboard)/layout.tsx`
-- [x] Structure avec Header responsive
+### 4.1 Composants Layout
+- [x] Header responsive avec navigation
+- [x] ThemeToggle (dark/light/system)
+- [x] UserMenu avec dropdown
+- [x] NotificationBell avec badge
 
-### 4.2 Composants Layout
-- [x] `Header.tsx` - Navigation principale, user menu, notifications placeholder
-- [x] `ThemeToggle.tsx` - Bouton dark/light/system mode
-- [x] `UserMenu.tsx` - Dropdown utilisateur avec avatar
+### 4.2 Composants shadcn/ui
+- button, card, input, label, separator
+- dropdown-menu, avatar, dialog, select
+- textarea, switch, popover, calendar
+- alert-dialog, scroll-area, sonner (toasts)
 
-### 4.3 Composants shadcn/ui Installés
-- [x] button, card, input, label, separator
-- [x] dropdown-menu, avatar
-- [x] dialog, select, textarea, switch
-- [x] popover, calendar (date picker)
-- [x] sonner (toasts)
-
-### 4.4 Theme Provider
-- [x] `src/components/providers/theme-provider.tsx`
-- [x] Integration next-themes
+### 4.3 Providers
+- [x] ThemeProvider (next-themes)
+- [x] SessionProvider (next-auth)
+- [x] QueryProvider (react-query)
 
 ---
 
 ## Phase 5 : Calendrier ✅
 
-### 5.1 Container Principal
-- [x] `CalendarView.tsx` - Container avec state management
-- [x] State: currentDate, view (month/week/day/year)
-- [x] Navigation: goToToday, goToPrevious, goToNext
-- [x] Sélecteur de vue
+### 5.1 Vues Calendrier
+- [x] `MonthView` - Grille 6x7 avec événements
+- [x] `WeekView` - Timeline 7 jours avec créneaux
+- [x] `DayView` - Créneaux horaires 30min
+- [x] `YearView` - 12 mini-mois cliquables
 
-### 5.2 Vues Calendrier
-- [x] `MonthView.tsx` - Grille 6x7 avec vraies dates
-- [x] `WeekView.tsx` - Timeline 7 jours avec créneaux 6h-22h
-- [x] `DayView.tsx` - Créneaux horaires 30min, 0h-23h
-- [x] `YearView.tsx` - 12 mini-mois cliquables
-
-### 5.3 Fonctionnalités
-- [x] Navigation entre dates (flèches < >)
+### 5.2 Fonctionnalités
+- [x] Navigation entre dates
 - [x] Bouton "Aujourd'hui"
-- [x] Jour actuel surligné (cercle bleu)
-- [x] Navigation entre vues (clic jour → vue jour)
-- [x] Locale française (date-fns/locale/fr)
-
-### 5.4 Index des Exports
-- [x] `src/components/calendar/index.ts`
+- [x] Jour actuel surligné
+- [x] Navigation entre vues
+- [x] Locale française
 
 ---
 
 ## Phase 6 : Gestion des Événements ✅
 
 ### 6.1 API Events
-- [x] `GET /api/events` - Liste événements (filtres: view, date, includePartner)
+- [x] `GET /api/events` - Liste avec filtres (view, date, includePartner)
 - [x] `POST /api/events` - Créer événement
-- [x] `GET /api/events/[id]` - Détails événement
-- [x] `PUT /api/events/[id]` - Modifier événement
-- [x] `DELETE /api/events/[id]` - Supprimer événement
+- [x] `GET /api/events/[id]` - Détails
+- [x] `PUT /api/events/[id]` - Modifier
+- [x] `DELETE /api/events/[id]` - Supprimer
+- [x] `GET/PUT /api/events/[id]/reminders` - Rappels
 
-### 6.2 API Categories
-- [x] `GET /api/categories` - Liste catégories
-- [x] `POST /api/categories` - Créer catégorie
-
-### 6.3 Composants Events
-- [x] `EventForm.tsx` - Modal formulaire création/édition
-  - Titre, description, lieu
-  - Sélecteur de dates avec calendrier
-  - Heures début/fin
-  - Toggle "Journée entière"
-  - Visibilité (Privé/Partagé/Occupé)
-  - Statut (Occupé/Disponible/Provisoire/Absent)
-  - Sélection catégorie
-  - Palette de couleurs (8 choix)
-  - Bouton supprimer (mode édition)
-- [x] `EventCard.tsx` - Affichage compact d'un événement
-- [x] `EventList.tsx` - Liste d'événements dans une cellule
-
-### 6.4 Intégration Calendrier
-- [x] MonthView affiche les événements avec EventList
-- [x] WeekView affiche les événements + barre "Journée entière"
-- [x] DayView affiche les événements avec durée proportionnelle
-
-### 6.5 Logique de Visibilité
-- [x] PRIVATE : Invisible pour le partenaire
-- [x] SHARED : Visible avec tous les détails
-- [x] BUSY_ONLY : Visible comme "Occupé(e)" sans détails
-
-### 6.6 Historique
-- [x] EventHistory créé à chaque création/modification
-
-### 6.7 À faire plus tard (Phase 11)
-- [ ] Récurrence (quotidien, hebdo, mensuel, annuel)
-- [ ] Rappels
+### 6.2 Fonctionnalités
+- [x] Formulaire complet (titre, dates, lieu, description)
+- [x] Sélecteur de couleurs (8 choix)
+- [x] Catégories personnalisées
+- [x] Visibilité (Privé/Partagé/Occupé)
+- [x] Récurrence (quotidien, hebdo, mensuel, annuel)
+- [x] Rappels configurables
+- [x] Historique des modifications
 
 ---
 
-## Phase 7 : To-Do Lists ⏳
+## Phase 7 : To-Do Lists ✅
 
 ### 7.1 API Todos
-| Route | Méthode | Description |
-|-------|---------|-------------|
-| `/api/todos` | GET | Liste todos personnels |
-| `/api/todos` | POST | Créer todo |
-| `/api/todos/[id]` | PUT | Modifier todo |
-| `/api/todos/[id]` | DELETE | Supprimer todo |
-| `/api/todos/[id]/complete` | PATCH | Toggle completion |
-| `/api/todos/shared` | GET | Todos partagés |
-| `/api/todos/[id]/convert` | POST | Convertir en événement |
+- [x] `GET /api/todos` - Liste (filter, shared, priority)
+- [x] `POST /api/todos` - Créer
+- [x] `PUT /api/todos/[id]` - Modifier
+- [x] `DELETE /api/todos/[id]` - Supprimer
+- [x] `PATCH /api/todos/[id]` - Toggle completion
+- [x] `POST /api/todos/[id]/convert` - Convertir en événement
 
-### 7.2 Checklist Phase 7
-- [ ] Créer `src/app/api/todos/route.ts`
-- [ ] Créer `src/app/api/todos/[id]/route.ts`
-- [ ] Créer `src/app/api/todos/shared/route.ts`
-- [ ] Créer `src/app/api/todos/[id]/convert/route.ts`
-- [ ] Créer `src/app/(dashboard)/todos/page.tsx`
-- [ ] Créer `TodoList.tsx`
-- [ ] Créer `TodoItem.tsx`
-- [ ] Créer `TodoForm.tsx`
-- [ ] Implémenter la conversion en événement
+### 7.2 Fonctionnalités
+- [x] Priorités (LOW, MEDIUM, HIGH, URGENT)
+- [x] Date d'échéance avec indicateur retard
+- [x] Partage avec partenaire
+- [x] Assignation au partenaire
+- [x] Conversion todo → événement
 
 ---
 
-## Phase 8 : Système Partenaire ⏳
+## Phase 8 : Système Partenaire ✅
 
 ### 8.1 API Partner
-| Route | Méthode | Description |
-|-------|---------|-------------|
-| `/api/partner` | GET | Info partenaire actuel |
-| `/api/partner/invite` | POST | Envoyer invitation |
-| `/api/partner/invite/[token]` | GET | Vérifier invitation |
-| `/api/partner/accept` | POST | Accepter invitation |
-| `/api/partner/decline` | POST | Refuser invitation |
-| `/api/partner/unlink` | DELETE | Dissocier partenaire |
+- [x] `GET /api/partner` - Info partenaire + invitations
+- [x] `POST /api/partner/invite` - Envoyer invitation
+- [x] `DELETE /api/partner/invite` - Annuler invitation
+- [x] `GET /api/partner/invite/[token]` - Détails invitation
+- [x] `POST /api/partner/accept` - Accepter invitation
+- [x] `POST /api/partner/decline` - Refuser invitation
+- [x] `DELETE /api/partner/unlink` - Dissocier partenaire
 
-### 8.2 Checklist Phase 8
-- [ ] Créer `src/app/api/partner/route.ts`
-- [ ] Créer `src/app/api/partner/invite/route.ts`
-- [ ] Créer `src/app/api/partner/accept/route.ts`
-- [ ] Créer `src/app/api/partner/unlink/route.ts`
-- [ ] Créer `src/app/(dashboard)/partner/invite/[token]/page.tsx`
-- [ ] Créer `PartnerCard.tsx`
-- [ ] Créer `PartnerInvite.tsx`
-- [ ] Créer template email d'invitation
+### 8.2 Fonctionnalités
+- [x] Invitation par email
+- [x] Page d'acceptation publique
+- [x] Liaison bidirectionnelle des comptes
+- [x] Affichage statut partenaire (icône coeur)
+- [x] Email de notification
 
 ---
 
-## Phase 9 : Notifications ⏳
+## Phase 9 : Notifications ✅
 
-### 9.1 Types de Notifications
-| Type | Trigger | Message |
-|------|---------|---------|
-| `EVENT_REMINDER` | X min avant événement | "Rappel: {title} dans {time}" |
-| `EVENT_CREATED` | Partenaire crée event partagé | "{partner} a créé {title}" |
-| `EVENT_UPDATED` | Partenaire modifie event | "{partner} a modifié {title}" |
-| `TODO_ASSIGNED` | Partenaire assigne todo | "{partner} t'a assigné {title}" |
-| `PARTNER_INVITATION` | Invitation reçue | "{name} vous invite" |
+### 9.1 API Notifications
+- [x] `GET /api/notifications` - Liste (limit, unread)
+- [x] `PATCH /api/notifications` - Marquer comme lu
+- [x] `DELETE /api/notifications` - Supprimer
 
-### 9.2 Checklist Phase 9
-- [ ] Créer `src/app/api/notifications/route.ts`
-- [ ] Créer `NotificationBell.tsx`
-- [ ] Créer `NotificationList.tsx`
-- [ ] Créer le service de rappels
+### 9.2 Types de Notifications
+- EVENT_CREATED, EVENT_UPDATED, EVENT_DELETED
+- TODO_ASSIGNED, TODO_COMPLETED
+- PARTNER_INVITATION, PARTNER_ACCEPTED
+
+### 9.3 Fonctionnalités
+- [x] Badge compteur non-lus
+- [x] Dropdown avec liste des notifications
+- [x] Marquer tout comme lu
+- [x] Notifications automatiques
 
 ---
 
-## Phase 10 : Paramètres ⏳
+## Phase 10 : Paramètres ✅
 
 ### 10.1 Pages Settings
-```
-/settings
-├── /profile        # Nom, avatar
-├── /appearance     # Thème, couleurs, formats
-├── /notifications  # Préférences notifications
-└── /categories     # Gestion catégories
-```
+- [x] `/settings/profile` - Nom, prénom, avatar
+- [x] `/settings/appearance` - Thème, couleurs, formats date/heure
+- [x] `/settings/notifications` - Préférences email, push, rappels
+- [x] `/settings/categories` - Gestion catégories personnalisées
+- [x] `/settings/partner` - Gestion partenaire
 
-### 10.2 Checklist Phase 10
-- [ ] Créer `src/app/api/user/settings/route.ts`
-- [ ] Créer `src/app/(dashboard)/settings/page.tsx`
-- [ ] Créer `ProfileForm.tsx`
-- [ ] Créer `AppearanceSettings.tsx`
-- [ ] Créer `CategoryManager.tsx`
+### 10.2 API User
+- [x] `GET/PUT /api/user/profile`
+- [x] `GET/PUT /api/user/settings`
+- [x] `GET/PUT/DELETE /api/categories/[id]`
 
 ---
 
-## Phase 11 : Optimisation & Finition ⏳
+## Phase 11 : Optimisation & Finition ✅
 
-### 11.1 Checklist Phase 11
-- [ ] Configurer React Query cache
-- [ ] Implémenter lazy loading
-- [ ] Ajouter la pagination
-- [ ] Récurrence événements
-- [ ] Rappels événements
-- [ ] Error boundaries
-- [ ] Tests
+### 11.1 React Query
+- [x] QueryProvider configuré
+- [x] Hooks personnalisés (useEvents, useTodos)
+- [x] Cache automatique (1 minute staleTime)
+- [x] Invalidation automatique après mutations
+
+### 11.2 Composants Partagés
+- [x] LoadingSpinner, PageLoader, InlineLoader
+- [x] EmptyState (events, todos, notifications)
+- [x] ErrorBoundary, ErrorDisplay
+
+### 11.3 Récurrence & Rappels
+- [x] Bibliothèque RRule pour récurrence
+- [x] Presets (quotidien, hebdo, mensuel, annuel, jours ouvrés)
+- [x] Date de fin optionnelle
+- [x] Expansion des occurrences dans l'API
+- [x] Rappels configurables par événement
 
 ---
 
@@ -415,18 +314,41 @@ src/
 - [ ] SMTP fonctionnel
 - [ ] Build sans erreurs (`npm run build`)
 
-### 12.2 Notes Production
-
-**Variables à changer :**
+### 12.2 Variables Production
 ```env
 NEXTAUTH_URL="https://ton-domaine.com"
 NEXTAUTH_SECRET="nouveau-secret-genere"
+DATABASE_URL="postgresql://..."
 ```
 
-**Google OAuth Console :**
-- Ajouter `https://ton-domaine.com` aux origines autorisées
-- Ajouter `https://ton-domaine.com/api/auth/callback/google` aux URIs de redirection
+### 12.3 Google OAuth Console
+- Ajouter domaine aux origines autorisées
+- Ajouter callback URL
 - Passer en mode "Production"
+
+---
+
+## Roadmap Future
+
+### Synchronisation Google Calendar
+- [ ] Connexion OAuth2 avec scopes Calendar
+- [ ] Import des événements Google → App
+- [ ] Export des événements App → Google
+- [ ] Synchronisation bidirectionnelle en temps réel
+
+### Import Intelligent d'Événements
+- [ ] Parser emails Doctolib (RDV médicaux)
+- [ ] Parser emails Nibelis (congés, absences)
+- [ ] Parser billets d'avion (emails compagnies)
+- [ ] Parser réservations (hôtels, restaurants)
+- [ ] Détection automatique via IA
+
+### Autres Améliorations
+- [ ] PWA (Progressive Web App)
+- [ ] Notifications push navigateur
+- [ ] Mode hors-ligne
+- [ ] Widget calendrier
+- [ ] Export ICS/iCal
 
 ---
 
@@ -451,21 +373,4 @@ npx shadcn@latest add [name]   # Ajouter composant shadcn
 
 ---
 
-## Configuration Actuelle (Dev)
-
-```env
-DATABASE_URL="postgresql://neondb_owner:...@neon.tech/neondb?sslmode=require"
-NEXTAUTH_URL="http://localhost:3000"
-GOOGLE_CLIENT_ID="991484520280-..."
-GOOGLE_CLIENT_SECRET="GOCSPX-..."
-ALLOWED_EMAILS="anischaarana@gmail.com,amirabesbes9944@gmail.com"
-SMTP_HOST="smtp.hostinger.com"
-SMTP_PORT="465"
-SMTP_USER="noreplay@anis-chaarana.fr"
-SMTP_SECURE="true"
-EMAIL_FROM="Calendrier Couple <noreplay@anis-chaarana.fr>"
-```
-
----
-
-*Dernière mise à jour : 31 Décembre 2024*
+*Dernière mise à jour : 01 Janvier 2026*

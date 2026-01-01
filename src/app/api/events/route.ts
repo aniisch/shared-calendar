@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { eventSchema } from "@/lib/validators";
-import { startOfDay, endOfDay, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from "date-fns";
+import { startOfDay, endOfDay, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addMilliseconds, differenceInMilliseconds } from "date-fns";
+import { notifyEventCreated } from "@/lib/notifications";
+import { getRecurrenceOccurrences } from "@/lib/recurrence";
 
 // GET /api/events - Liste des événements
 export async function GET(request: NextRequest) {
@@ -59,16 +61,13 @@ export async function GET(request: NextRequest) {
       userIds.push(session.user.partnerId);
     }
 
-    const events = await prisma.event.findMany({
+    // Récupérer les événements non récurrents dans la plage
+    const regularEvents = await prisma.event.findMany({
       where: {
         ownerId: { in: userIds },
-        OR: [
-          // Événements dans la plage
-          {
-            startDate: { lte: endDate },
-            endDate: { gte: startDate },
-          },
-        ],
+        isRecurring: false,
+        startDate: { lte: endDate },
+        endDate: { gte: startDate },
       },
       include: {
         category: true,
@@ -83,8 +82,62 @@ export async function GET(request: NextRequest) {
       orderBy: { startDate: "asc" },
     });
 
+    // Récupérer les événements récurrents (qui pourraient avoir des occurrences dans la plage)
+    const recurringEvents = await prisma.event.findMany({
+      where: {
+        ownerId: { in: userIds },
+        isRecurring: true,
+        recurrenceRule: { not: null },
+        OR: [
+          { recurrenceEnd: null },
+          { recurrenceEnd: { gte: startDate } },
+        ],
+        startDate: { lte: endDate },
+      },
+      include: {
+        category: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    // Expandre les événements récurrents en instances
+    const expandedEvents: typeof regularEvents = [];
+
+    for (const event of recurringEvents) {
+      if (!event.recurrenceRule) continue;
+
+      const occurrences = getRecurrenceOccurrences(
+        event.recurrenceRule,
+        event.startDate,
+        startDate,
+        endDate
+      );
+
+      const eventDuration = differenceInMilliseconds(event.endDate, event.startDate);
+
+      for (const occurrence of occurrences) {
+        expandedEvents.push({
+          ...event,
+          id: `${event.id}_${occurrence.getTime()}`, // ID unique pour chaque instance
+          startDate: occurrence,
+          endDate: addMilliseconds(occurrence, eventDuration),
+        });
+      }
+    }
+
+    // Combiner tous les événements
+    const allEvents = [...regularEvents, ...expandedEvents].sort(
+      (a, b) => a.startDate.getTime() - b.startDate.getTime()
+    );
+
     // Filtrer les événements du partenaire selon leur visibilité
-    const filteredEvents = events.map((event) => {
+    const filteredEvents = allEvents.map((event) => {
       // Si c'est notre événement, tout afficher
       if (event.ownerId === session.user.id) {
         return event;
@@ -182,6 +235,16 @@ export async function POST(request: NextRequest) {
         changes: JSON.parse(JSON.stringify(data)),
       },
     });
+
+    // Notifier le partenaire si l'événement est partagé
+    if (data.visibility === "SHARED" && session.user.partnerId) {
+      await notifyEventCreated(
+        session.user.partnerId,
+        event.title,
+        event.id,
+        session.user.name || "Votre partenaire"
+      );
+    }
 
     return NextResponse.json(event, { status: 201 });
   } catch (error) {
