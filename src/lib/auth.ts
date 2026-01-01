@@ -117,6 +117,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: true,
             firstName: true,
             lastName: true,
+            image: true,
             avatar: true,
             partnerId: true,
             currentStatus: true,
@@ -129,7 +130,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.name = dbUser.name;
           token.firstName = dbUser.firstName;
           token.lastName = dbUser.lastName;
-          token.avatar = dbUser.avatar;
+          // Priorité: avatar custom > image OAuth
+          token.avatar = dbUser.avatar || dbUser.image;
           token.partnerId = dbUser.partnerId;
           token.currentStatus = dbUser.currentStatus;
         }

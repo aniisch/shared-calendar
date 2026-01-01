@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { User, Settings, LogOut, Heart, UserPlus } from "lucide-react";
 
@@ -55,26 +56,34 @@ export function UserMenu({ user }: UserMenuProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            Profil
+          <DropdownMenuItem asChild>
+            <Link href="/settings/profile">
+              <User className="mr-2 h-4 w-4" />
+              Profil
+            </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            Paramètres
+          <DropdownMenuItem asChild>
+            <Link href="/settings">
+              <Settings className="mr-2 h-4 w-4" />
+              Paramètres
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           {user.partnerId ? (
-            <DropdownMenuItem>
-              <Heart className="mr-2 h-4 w-4 text-pink-500" />
-              Mon partenaire
+            <DropdownMenuItem asChild>
+              <Link href="/settings/partner">
+                <Heart className="mr-2 h-4 w-4 text-pink-500" />
+                Mon partenaire
+              </Link>
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Inviter partenaire
+            <DropdownMenuItem asChild>
+              <Link href="/settings/partner">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Inviter partenaire
+              </Link>
             </DropdownMenuItem>
           )}
         </DropdownMenuGroup>

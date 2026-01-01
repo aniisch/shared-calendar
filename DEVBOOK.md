@@ -31,9 +31,9 @@ Guide de développement complet avec toutes les étapes d'implémentation.
 | 4 | UI/UX de Base | ✅ Complété |
 | 5 | Calendrier | ✅ Complété |
 | 6 | Gestion des Événements | ✅ Complété |
-| 7 | To-Do Lists | ⏳ À faire |
-| 8 | Système Partenaire | ⏳ À faire |
-| 9 | Notifications | ⏳ À faire |
+| 7 | To-Do Lists | ✅ Complété |
+| 8 | Système Partenaire | ✅ Complété |
+| 9 | Notifications | ✅ Complété |
 | 10 | Paramètres | ⏳ À faire |
 | 11 | Optimisation & Finition | ⏳ À faire |
 | 12 | Déploiement | ⏳ À faire |
@@ -73,6 +73,24 @@ npm run dev
 #### 4. Thème
 - [ ] Cliquer sur l'icône soleil/lune
 - [ ] Tester Light / Dark / System
+
+#### 5. Tâches (Todos)
+- [ ] Cliquer sur "Tâches" dans le menu
+- [ ] Créer une tâche personnelle
+- [ ] Modifier une tâche
+- [ ] Cocher/décocher une tâche
+- [ ] Filtrer par statut (Toutes/En cours/Terminées)
+- [ ] Basculer vers "Partagées"
+- [ ] Convertir une tâche en événement
+- [ ] Supprimer une tâche
+
+#### 6. Partenaire
+- [ ] Cliquer sur l'icône coeur dans le header
+- [ ] Envoyer une invitation (email du partenaire)
+- [ ] Vérifier l'email reçu
+- [ ] Accepter l'invitation (depuis le lien email)
+- [ ] Vérifier que le coeur devient rose plein
+- [ ] Voir les infos partenaire dans /settings/partner
 
 ---
 
@@ -304,72 +322,96 @@ src/
 
 ---
 
-## Phase 7 : To-Do Lists ⏳
+## Phase 7 : To-Do Lists ✅
 
 ### 7.1 API Todos
 | Route | Méthode | Description |
 |-------|---------|-------------|
-| `/api/todos` | GET | Liste todos personnels |
+| `/api/todos` | GET | Liste todos (filter: all/active/completed, shared) |
 | `/api/todos` | POST | Créer todo |
+| `/api/todos/[id]` | GET | Détails todo |
 | `/api/todos/[id]` | PUT | Modifier todo |
 | `/api/todos/[id]` | DELETE | Supprimer todo |
-| `/api/todos/[id]/complete` | PATCH | Toggle completion |
-| `/api/todos/shared` | GET | Todos partagés |
+| `/api/todos/[id]` | PATCH | Toggle completion |
 | `/api/todos/[id]/convert` | POST | Convertir en événement |
 
-### 7.2 Checklist Phase 7
-- [ ] Créer `src/app/api/todos/route.ts`
-- [ ] Créer `src/app/api/todos/[id]/route.ts`
-- [ ] Créer `src/app/api/todos/shared/route.ts`
-- [ ] Créer `src/app/api/todos/[id]/convert/route.ts`
-- [ ] Créer `src/app/(dashboard)/todos/page.tsx`
-- [ ] Créer `TodoList.tsx`
-- [ ] Créer `TodoItem.tsx`
-- [ ] Créer `TodoForm.tsx`
-- [ ] Implémenter la conversion en événement
+### 7.2 Composants Todos
+- [x] `TodoItem.tsx` - Affichage todo avec checkbox, priorité, actions
+- [x] `TodoForm.tsx` - Modal formulaire création/édition
+- [x] `index.ts` - Exports
+
+### 7.3 Page Todos
+- [x] `/todos` - Page principale avec onglets (Personnelles/Partagées)
+- [x] Filtres (Toutes/En cours/Terminées)
+- [x] Actions: créer, modifier, supprimer, toggle completion
+- [x] Conversion todo → événement calendrier
+
+### 7.4 Fonctionnalités
+- [x] Priorités : LOW (gris), MEDIUM (bleu), HIGH (orange), URGENT (rouge)
+- [x] Date d'échéance avec indicateur retard
+- [x] Catégories avec couleurs
+- [x] Partage avec partenaire
+- [x] Assignation au partenaire
+- [x] Navigation dans le Header
 
 ---
 
-## Phase 8 : Système Partenaire ⏳
+## Phase 8 : Système Partenaire ✅
 
 ### 8.1 API Partner
 | Route | Méthode | Description |
 |-------|---------|-------------|
-| `/api/partner` | GET | Info partenaire actuel |
+| `/api/partner` | GET | Info partenaire + invitations |
 | `/api/partner/invite` | POST | Envoyer invitation |
-| `/api/partner/invite/[token]` | GET | Vérifier invitation |
+| `/api/partner/invite` | DELETE | Annuler invitation |
+| `/api/partner/invite/[token]` | GET | Détails invitation |
 | `/api/partner/accept` | POST | Accepter invitation |
 | `/api/partner/decline` | POST | Refuser invitation |
 | `/api/partner/unlink` | DELETE | Dissocier partenaire |
 
 ### 8.2 Checklist Phase 8
-- [ ] Créer `src/app/api/partner/route.ts`
-- [ ] Créer `src/app/api/partner/invite/route.ts`
-- [ ] Créer `src/app/api/partner/accept/route.ts`
-- [ ] Créer `src/app/api/partner/unlink/route.ts`
-- [ ] Créer `src/app/(dashboard)/partner/invite/[token]/page.tsx`
-- [ ] Créer `PartnerCard.tsx`
-- [ ] Créer `PartnerInvite.tsx`
-- [ ] Créer template email d'invitation
+- [x] Créer `src/app/api/partner/route.ts`
+- [x] Créer `src/app/api/partner/invite/route.ts`
+- [x] Créer `src/app/api/partner/invite/[token]/route.ts`
+- [x] Créer `src/app/api/partner/accept/route.ts`
+- [x] Créer `src/app/api/partner/decline/route.ts`
+- [x] Créer `src/app/api/partner/unlink/route.ts`
+- [x] Créer page `/partner/invite/[token]` (acceptation publique)
+- [x] Créer page `/settings/partner` (gestion partenaire)
+- [x] Créer `PartnerCard.tsx` (affichage partenaire)
+- [x] Créer `PartnerInviteForm.tsx` (formulaire invitation)
+- [x] Template email d'invitation (déjà dans mail.ts)
+- [x] Icône partenaire dans le Header (coeur rose)
 
 ---
 
-## Phase 9 : Notifications ⏳
+## Phase 9 : Notifications ✅
 
 ### 9.1 Types de Notifications
 | Type | Trigger | Message |
 |------|---------|---------|
-| `EVENT_REMINDER` | X min avant événement | "Rappel: {title} dans {time}" |
 | `EVENT_CREATED` | Partenaire crée event partagé | "{partner} a créé {title}" |
 | `EVENT_UPDATED` | Partenaire modifie event | "{partner} a modifié {title}" |
-| `TODO_ASSIGNED` | Partenaire assigne todo | "{partner} t'a assigné {title}" |
+| `EVENT_DELETED` | Partenaire supprime event | "{partner} a supprimé {title}" |
+| `TODO_ASSIGNED` | Partenaire assigne todo | "{partner} vous a assigné {title}" |
+| `TODO_COMPLETED` | Partenaire termine todo | "{partner} a terminé {title}" |
 | `PARTNER_INVITATION` | Invitation reçue | "{name} vous invite" |
+| `PARTNER_ACCEPTED` | Invitation acceptée | "{partner} a accepté" |
 
-### 9.2 Checklist Phase 9
-- [ ] Créer `src/app/api/notifications/route.ts`
-- [ ] Créer `NotificationBell.tsx`
-- [ ] Créer `NotificationList.tsx`
-- [ ] Créer le service de rappels
+### 9.2 API Notifications
+| Route | Méthode | Description |
+|-------|---------|-------------|
+| `/api/notifications` | GET | Liste notifications (limit, unread) |
+| `/api/notifications` | PATCH | Marquer comme lu (ids, markAllRead) |
+| `/api/notifications` | DELETE | Supprimer (id, clearAll) |
+
+### 9.3 Checklist Phase 9
+- [x] Créer `src/app/api/notifications/route.ts`
+- [x] Créer `src/lib/notifications.ts` (fonctions helper)
+- [x] Créer `NotificationBell.tsx` (dropdown avec badge)
+- [x] Intégrer dans le Header
+- [x] Notifications automatiques événements (create/update/delete)
+- [x] Notifications automatiques todos (assign/complete)
 
 ---
 
@@ -458,7 +500,7 @@ DATABASE_URL="postgresql://neondb_owner:...@neon.tech/neondb?sslmode=require"
 NEXTAUTH_URL="http://localhost:3000"
 GOOGLE_CLIENT_ID="991484520280-..."
 GOOGLE_CLIENT_SECRET="GOCSPX-..."
-ALLOWED_EMAILS="anischaarana@gmail.com,amirabesbes9944@gmail.com"
+ALLOWED_EMAILS="anischaarana@gmail.com,partener@gmail.com"
 SMTP_HOST="smtp.hostinger.com"
 SMTP_PORT="465"
 SMTP_USER="noreplay@anis-chaarana.fr"
@@ -468,4 +510,4 @@ EMAIL_FROM="Calendrier Couple <noreplay@anis-chaarana.fr>"
 
 ---
 
-*Dernière mise à jour : 31 Décembre 2024*
+*Dernière mise à jour : 01 Janvier 2026*

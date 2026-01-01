@@ -5,9 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon, Loader2, Trash2 } from "lucide-react";
+import { CalendarIcon, Loader2, Trash2, Repeat } from "lucide-react";
 
 import { eventSchema, type EventInput } from "@/lib/validators";
+import { RECURRENCE_PRESETS, createRuleFromPreset, type RecurrencePreset } from "@/lib/recurrence";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,6 +88,7 @@ export function EventForm({
 }: EventFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [recurrencePreset, setRecurrencePreset] = useState<RecurrencePreset>("none");
 
   const {
     register,
@@ -104,7 +106,7 @@ export function EventForm({
       startDate: new Date(),
       endDate: new Date(),
       isAllDay: false,
-      visibility: "PRIVATE",
+      visibility: "SHARED",
       status: "BUSY",
       categoryId: null,
       color: null,
@@ -122,6 +124,24 @@ export function EventForm({
   const watchVisibility = watch("visibility");
   const watchStatus = watch("status");
   const watchCategoryId = watch("categoryId");
+  const watchRecurrenceEnd = watch("recurrenceEnd");
+
+  // Handle recurrence preset changes
+  const handleRecurrenceChange = (preset: RecurrencePreset) => {
+    setRecurrencePreset(preset);
+    if (preset === "none") {
+      setValue("isRecurring", false);
+      setValue("recurrenceRule", null);
+    } else if (preset !== "custom") {
+      const rule = createRuleFromPreset(
+        preset,
+        watchStartDate,
+        watchRecurrenceEnd || undefined
+      );
+      setValue("isRecurring", true);
+      setValue("recurrenceRule", rule);
+    }
+  };
 
   // Réinitialiser le formulaire quand les defaultValues changent
   useEffect(() => {
@@ -427,6 +447,73 @@ export function EventForm({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          )}
+
+          {/* Récurrence */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Repeat className="h-4 w-4" />
+              Répétition
+            </Label>
+            <Select
+              value={recurrencePreset}
+              onValueChange={(value) => handleRecurrenceChange(value as RecurrencePreset)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Ne pas répéter" />
+              </SelectTrigger>
+              <SelectContent>
+                {RECURRENCE_PRESETS.filter(p => p.value !== "custom").map((preset) => (
+                  <SelectItem key={preset.value} value={preset.value}>
+                    {preset.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Date de fin de récurrence */}
+          {recurrencePreset !== "none" && (
+            <div className="space-y-2">
+              <Label>Fin de la répétition</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !watchRecurrenceEnd && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {watchRecurrenceEnd
+                      ? format(watchRecurrenceEnd, "PP", { locale: fr })
+                      : "Jamais (optionnel)"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={watchRecurrenceEnd || undefined}
+                    onSelect={(date) => {
+                      setValue("recurrenceEnd", date || null);
+                      // Regenerate the rule with new end date
+                      if (recurrencePreset !== "custom") {
+                        const rule = createRuleFromPreset(
+                          recurrencePreset,
+                          watchStartDate,
+                          date || undefined
+                        );
+                        setValue("recurrenceRule", rule);
+                      }
+                    }}
+                    disabled={(date) => date < watchStartDate}
+                    locale={fr}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           )}
 
